@@ -117,6 +117,20 @@ Open **http://127.0.0.1:8000** (fan assistant) and **http://127.0.0.1:8000/ops.h
 $env:ANTHROPIC_API_KEY="sk-..."   export ANTHROPIC_API_KEY="sk-..."
 ```
 
+### Deploy to Vercel
+
+The repo ships with `vercel.json` + `api/index.py`, which re-export the exact same FastAPI app used locally (identical routes, security middleware, and static file serving) as a single serverless function.
+
+```bash
+npm i -g vercel     # if you don't have it
+vercel               # first deploy - links the project, deploys a preview
+vercel --prod        # promote to the production URL
+```
+
+Set `ANTHROPIC_API_KEY` (and optionally `STADIUMIQ_MODEL`, `STADIUMIQ_RATE_LIMIT`, `STADIUMIQ_MAX_MESSAGE_LENGTH`) under Project Settings → Environment Variables to enable the Claude engine in production; without it the deployment serves the offline engine, same as local.
+
+**Serverless caveat:** the in-memory rate limiter, crowd-snapshot cache and incident log (see [Assumptions](#assumptions)) are per function instance. On Vercel, concurrent or cold-started invocations may not share that state — e.g. an incident logged on one instance might not appear in a `GET` served by another. This doesn't affect navigation, facilities, crowd levels or chat (all computed fresh per request); it only means the ops incident log isn't guaranteed durable across instances. A production deployment would back it with Redis/a database.
+
 ### Run the tests
 
 ```bash

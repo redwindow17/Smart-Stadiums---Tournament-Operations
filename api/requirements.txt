@@ -1,0 +1,5 @@
+# Vercel serverless runtime deps only - no uvicorn (Vercel provides its own
+# ASGI invocation, it doesn't run our server loop) and no test deps.
+fastapi>=0.111
+pydantic>=2.7
+anthropic>=0.40
