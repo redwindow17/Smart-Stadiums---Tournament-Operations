@@ -1,0 +1,32 @@
+[project]
+name = "stadiumiq"
+version = "1.0.0"
+description = "GenAI matchday copilot for FIFA World Cup 2026 venues"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "StadiumIQ contributors" }]
+keywords = ["fifa-world-cup-2026", "genai", "stadium", "fastapi", "accessibility"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, isort, bugbear, comprehensions, pyupgrade, simplify.
+select = ["E", "F", "I", "B", "C4", "UP", "SIM"]
+ignore = ["B008"]  # FastAPI Depends()/Query() defaults are the framework idiom.
+
+[tool.ruff.lint.per-file-ignores]
+# These modules are content, not logic: keeping each translated sentence and
+# keyword set on one line is far more readable than wrapping mid-phrase.
+"app/ai/local_engine.py" = ["E501"]  # trilingual response templates
+"app/ai/nlu.py" = ["E501"]           # multilingual keyword-set literals
+
+[tool.black]
+line-length = 120
+target-version = ["py310"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

@@ -12,14 +12,14 @@ from app.main import create_app
 
 
 def make_settings(**overrides) -> Settings:
-    base = dict(
-        anthropic_api_key="",
-        model="claude-opus-4-8",
-        rate_limit_per_minute=100,
-        max_message_length=1000,
-        max_history_turns=6,
-        request_timeout_seconds=5.0,
-    )
+    base = {
+        "anthropic_api_key": "",
+        "model": "claude-opus-4-8",
+        "rate_limit_per_minute": 100,
+        "max_message_length": 1000,
+        "max_history_turns": 6,
+        "request_timeout_seconds": 5.0,
+    }
     base.update(overrides)
     return Settings(**base)
 

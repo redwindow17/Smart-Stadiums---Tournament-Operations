@@ -37,4 +37,4 @@ def chat(request: Request, payload: ChatRequest) -> dict:
             history=history,
         )
     except UnknownVenueError:
-        raise HTTPException(status_code=404, detail="Unknown venue")
+        raise HTTPException(status_code=404, detail="Unknown venue") from None

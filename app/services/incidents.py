@@ -6,14 +6,15 @@ safety-critical priority call.
 """
 from __future__ import annotations
 
+import builtins
 import itertools
 import threading
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Deque, Dict, List, Optional
+from typing import Any
 
-CATEGORY_WEIGHTS: Dict[str, int] = {
+CATEGORY_WEIGHTS: dict[str, int] = {
     "medical": 5,
     "crowd_crush": 5,
     "fire_hazard": 5,
@@ -28,7 +29,7 @@ CATEGORY_WEIGHTS: Dict[str, int] = {
 # Categories where surrounding crowd pressure escalates the response.
 _CROWD_SENSITIVE = {"medical", "crowd_crush", "security", "fire_hazard"}
 
-PLAYBOOK: Dict[str, List[str]] = {
+PLAYBOOK: dict[str, list[str]] = {
     "medical": [
         "Dispatch nearest first-aid team with AED",
         "Clear a 5 m working perimeter and an evacuation corridor",
@@ -85,17 +86,17 @@ class Incident:
     description: str
     score: int
     priority: str
-    actions: List[str]
+    actions: list[str]
     crowd_level: str
     created_at: str
     status: str = "open"
-    ai_brief: Optional[str] = None
+    ai_brief: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
-        return {k: v for k, v in self.__dict__.items()}
+    def to_dict(self) -> dict[str, Any]:
+        return dict(self.__dict__)
 
 
-def triage_score(category: str, severity_hint: Optional[int], crowd_level: str) -> int:
+def triage_score(category: str, severity_hint: int | None, crowd_level: str) -> int:
     base = CATEGORY_WEIGHTS.get(category, 2)
     score = max(base, severity_hint or 0)
     if crowd_level in ("high", "critical") and category in _CROWD_SENSITIVE:
@@ -118,7 +119,7 @@ class IncidentLog:
     """Bounded in-memory incident store (per app instance)."""
 
     max_items: int = 200
-    _items: Deque[Incident] = field(default_factory=deque)
+    _items: deque[Incident] = field(default_factory=deque)
     _lock: threading.Lock = field(default_factory=threading.Lock)
 
     def create(
@@ -128,7 +129,7 @@ class IncidentLog:
         zone_name: str,
         category: str,
         description: str,
-        severity_hint: Optional[int],
+        severity_hint: int | None,
         crowd_level: str,
     ) -> Incident:
         score = triage_score(category, severity_hint, crowd_level)
@@ -151,7 +152,7 @@ class IncidentLog:
                 self._items.popleft()
         return incident
 
-    def list(self, venue_id: Optional[str] = None) -> List[Incident]:
+    def list(self, venue_id: str | None = None) -> builtins.list[Incident]:
         with self._lock:
             items = list(self._items)
         if venue_id:

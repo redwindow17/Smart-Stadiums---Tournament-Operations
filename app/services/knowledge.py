@@ -10,7 +10,7 @@ import json
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
@@ -25,7 +25,7 @@ class UnknownVenueError(KeyError):
 
 
 @lru_cache(maxsize=1)
-def _load() -> Dict[str, Any]:
+def _load() -> dict[str, Any]:
     with open(DATA_DIR / "stadiums.json", encoding="utf-8") as fh:
         stadiums = json.load(fh)
     with open(DATA_DIR / "matches.json", encoding="utf-8") as fh:
@@ -36,29 +36,29 @@ def _load() -> Dict[str, Any]:
     return {"venues": venues, "matches": matches["matches"]}
 
 
-def list_venues() -> List[Dict[str, Any]]:
+def list_venues() -> list[dict[str, Any]]:
     return [
         {"id": v["id"], "name": v["name"], "city": v["city"], "country": v["country"], "capacity": v["capacity"]}
         for v in _load()["venues"].values()
     ]
 
 
-def get_venue(venue_id: str) -> Dict[str, Any]:
+def get_venue(venue_id: str) -> dict[str, Any]:
     try:
         return _load()["venues"][venue_id]
     except KeyError as exc:
         raise UnknownVenueError(venue_id) from exc
 
 
-def zones_by_id(venue: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+def zones_by_id(venue: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return {z["id"]: z for z in venue["zones"]}
 
 
-def find_zone_positions(venue: Dict[str, Any], text: str) -> List[tuple]:
+def find_zone_positions(venue: dict[str, Any], text: str) -> list[tuple]:
     """Zones mentioned in ``text`` as ``(zone_id, char_index)`` pairs, ordered
     by first appearance. Matching is alias-based and case-insensitive."""
     lowered = text.lower()
-    found: Dict[str, int] = {}
+    found: dict[str, int] = {}
     for zone in venue["zones"]:
         aliases = [zone["name"].lower(), *[a.lower() for a in zone.get("aliases", [])]]
         best = -1
@@ -71,27 +71,27 @@ def find_zone_positions(venue: Dict[str, Any], text: str) -> List[tuple]:
     return sorted(found.items(), key=lambda kv: kv[1])
 
 
-def find_zones_in_text(venue: Dict[str, Any], text: str) -> List[str]:
+def find_zones_in_text(venue: dict[str, Any], text: str) -> list[str]:
     """Zone ids mentioned in ``text``, ordered by first appearance."""
     return [zone_id for zone_id, _ in find_zone_positions(venue, text)]
 
 
-def facilities_of_type(venue: Dict[str, Any], ftype: str) -> List[Dict[str, Any]]:
+def facilities_of_type(venue: dict[str, Any], ftype: str) -> list[dict[str, Any]]:
     return [f for f in venue["facilities"] if f["type"] == ftype]
 
 
-def matches_for_venue(venue_id: str) -> List[Dict[str, Any]]:
+def matches_for_venue(venue_id: str) -> list[dict[str, Any]]:
     return [m for m in _load()["matches"] if m["venue_id"] == venue_id]
 
 
-def next_match(venue_id: str, at: Optional[datetime] = None) -> Optional[Dict[str, Any]]:
+def next_match(venue_id: str, at: datetime | None = None) -> dict[str, Any] | None:
     """The match currently in progress at the venue, or the next one to start."""
     now = at or datetime.now(timezone.utc)
     candidates = [m for m in matches_for_venue(venue_id) if m["kickoff"] + MATCH_DURATION >= now]
     return min(candidates, key=lambda m: m["kickoff"]) if candidates else None
 
 
-def match_phase(venue_id: str, at: Optional[datetime] = None) -> str:
+def match_phase(venue_id: str, at: datetime | None = None) -> str:
     """Classify the current moment: ingress / in_match / egress / quiet."""
     now = at or datetime.now(timezone.utc)
     for m in matches_for_venue(venue_id):

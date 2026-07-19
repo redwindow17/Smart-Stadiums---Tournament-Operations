@@ -13,7 +13,7 @@ def _venue_or_404(venue_id: str) -> dict:
     try:
         return knowledge.get_venue(venue_id)
     except knowledge.UnknownVenueError:
-        raise HTTPException(status_code=404, detail="Unknown venue")
+        raise HTTPException(status_code=404, detail="Unknown venue") from None
 
 
 @router.get("/health")

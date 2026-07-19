@@ -13,14 +13,14 @@ from __future__ import annotations
 import hashlib
 import threading
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from .knowledge import get_venue, match_phase
 
 BUCKET_SECONDS = 600  # 10-minute buckets -> stable values, visible movement
 
 # (offset, spread) applied to the 0..1 hash value, per phase and zone kind.
-_PHASE_PROFILE: Dict[str, Dict[str, Tuple[float, float]]] = {
+_PHASE_PROFILE: dict[str, dict[str, tuple[float, float]]] = {
     "ingress": {"gate": (0.45, 0.50), "concourse": (0.30, 0.40), "external": (0.35, 0.45)},
     "in_match": {"gate": (0.05, 0.15), "concourse": (0.30, 0.50), "external": (0.05, 0.20)},
     "egress": {"gate": (0.50, 0.50), "concourse": (0.40, 0.40), "external": (0.45, 0.50)},
@@ -29,7 +29,7 @@ _PHASE_PROFILE: Dict[str, Dict[str, Tuple[float, float]]] = {
 
 _LEVELS = [(0.35, "low"), (0.60, "moderate"), (0.80, "high"), (2.0, "critical")]
 
-_cache: Dict[Tuple[str, int], Dict[str, Any]] = {}
+_cache: dict[tuple[str, int], dict[str, Any]] = {}
 _cache_lock = threading.Lock()
 _CACHE_MAX = 32
 
@@ -55,7 +55,7 @@ def _density(venue_id: str, zone_id: str, kind: str, bucket: int, phase: str) ->
     return round(min(1.0, offset + _raw(venue_id, zone_id, bucket) * spread), 3)
 
 
-def snapshot(venue_id: str, at: Optional[datetime] = None) -> Dict[str, Any]:
+def snapshot(venue_id: str, at: datetime | None = None) -> dict[str, Any]:
     """Density snapshot for all crowd-relevant zones of a venue."""
     now = at or datetime.now(timezone.utc)
     bucket = _bucket(now)
@@ -66,7 +66,7 @@ def snapshot(venue_id: str, at: Optional[datetime] = None) -> Dict[str, Any]:
 
     venue = get_venue(venue_id)
     phase = match_phase(venue_id, now)
-    zones: List[Dict[str, Any]] = []
+    zones: list[dict[str, Any]] = []
     for zone in venue["zones"]:
         if zone["kind"] not in ("gate", "concourse", "external"):
             continue
@@ -101,9 +101,9 @@ def snapshot(venue_id: str, at: Optional[datetime] = None) -> Dict[str, Any]:
     return result
 
 
-def recommendations(snap: Dict[str, Any]) -> List[Dict[str, str]]:
+def recommendations(snap: dict[str, Any]) -> list[dict[str, str]]:
     """Rule-based operational advice derived from a crowd snapshot."""
-    advice: List[Dict[str, str]] = []
+    advice: list[dict[str, str]] = []
     zones = snap["zones"]
     gates = [z for z in zones if z["kind"] == "gate"]
     concourses = [z for z in zones if z["kind"] == "concourse"]

@@ -11,9 +11,9 @@ Templates ship in the three host-country languages (en / es / fr).
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-PHRASES: Dict[str, Dict[str, Any]] = {
+PHRASES: dict[str, dict[str, Any]] = {
     "en": {
         "greeting": "Hi! I'm StadiumIQ, your matchday assistant at {venue}. Ask me about routes, facilities, transport, crowd levels, accessibility or today's match.",
         "acc_word": "step-free ",
@@ -115,8 +115,8 @@ class LocalEngine:
     def generate(
         self,
         message: str,
-        context: Dict[str, Any],
-        history: Optional[List[Dict[str, str]]] = None,
+        context: dict[str, Any],
+        history: list[dict[str, str]] | None = None,
     ) -> str:
         lang = context.get("language", "en")
         phrases = PHRASES.get(lang, PHRASES["en"])
@@ -229,7 +229,7 @@ class LocalEngine:
             quietest_pct=crowd["quietest"]["pct"],
         )
 
-    def ops_brief(self, snapshot: Dict[str, Any], recommendations: List[Dict[str, str]]) -> str:
+    def ops_brief(self, snapshot: dict[str, Any], recommendations: list[dict[str, str]]) -> str:
         hot = [z for z in snapshot["zones"] if z["level"] in ("high", "critical")]
         head = (
             f"Phase: {snapshot['phase']}. {len(hot)} zone(s) above comfortable density "

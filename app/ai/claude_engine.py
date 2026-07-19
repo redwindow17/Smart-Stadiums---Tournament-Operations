@@ -14,7 +14,7 @@ product never hard-fails on the AI dependency.
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from ..config import Settings
 from .prompts import OPS_SYSTEM_PROMPT, SYSTEM_PROMPT, build_ops_prompt, build_user_prompt
@@ -43,7 +43,7 @@ class ClaudeEngine:
         )
         self._model = settings.model
 
-    def _call(self, system: str, messages: List[Dict[str, Any]], max_tokens: int) -> str:
+    def _call(self, system: str, messages: list[dict[str, Any]], max_tokens: int) -> str:
         try:
             response = self._client.messages.create(
                 model=self._model,
@@ -65,15 +65,15 @@ class ClaudeEngine:
     def generate(
         self,
         message: str,
-        context: Dict[str, Any],
-        history: Optional[List[Dict[str, str]]] = None,
+        context: dict[str, Any],
+        history: list[dict[str, str]] | None = None,
     ) -> str:
-        messages: List[Dict[str, Any]] = []
+        messages: list[dict[str, Any]] = []
         for turn in history or []:
             messages.append({"role": turn["role"], "content": turn["content"]})
         messages.append({"role": "user", "content": build_user_prompt(context, message)})
         return self._call(SYSTEM_PROMPT, messages, max_tokens=700)
 
-    def ops_brief(self, snapshot: Dict[str, Any], recommendations: List[Dict[str, str]]) -> str:
+    def ops_brief(self, snapshot: dict[str, Any], recommendations: list[dict[str, str]]) -> str:
         messages = [{"role": "user", "content": build_ops_prompt(snapshot, recommendations)}]
         return self._call(OPS_SYSTEM_PROMPT, messages, max_tokens=500)

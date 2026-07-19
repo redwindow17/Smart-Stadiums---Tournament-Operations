@@ -12,7 +12,7 @@ Two safety properties are enforced structurally:
 from __future__ import annotations
 
 import json
-from typing import Any, Dict
+from typing import Any
 
 SYSTEM_PROMPT = """\
 You are StadiumIQ, the official matchday assistant for FIFA World Cup 2026 venues.
@@ -48,7 +48,7 @@ priority. Do not invent zones or numbers not present in the data. English only.
 """
 
 
-def build_user_prompt(context: Dict[str, Any], message: str) -> str:
+def build_user_prompt(context: dict[str, Any], message: str) -> str:
     return (
         "<venue_context>\n"
         + json.dumps(context, ensure_ascii=False, sort_keys=True)
@@ -60,7 +60,7 @@ def build_user_prompt(context: Dict[str, Any], message: str) -> str:
     )
 
 
-def build_ops_prompt(snapshot: Dict[str, Any], recommendations: list) -> str:
+def build_ops_prompt(snapshot: dict[str, Any], recommendations: list) -> str:
     payload = {"snapshot": snapshot, "recommendations": recommendations}
     return (
         "<ops_data>\n"

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import heapq
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from .knowledge import facilities_of_type, zones_by_id
 
@@ -27,9 +27,9 @@ class Route:
     destination: str
     total_minutes: float
     accessible: bool
-    steps: List[RouteStep] = field(default_factory=list)
+    steps: list[RouteStep] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "origin": self.origin,
             "destination": self.destination,
@@ -42,8 +42,8 @@ class Route:
         }
 
 
-def _adjacency(venue: Dict[str, Any], accessible: bool) -> Dict[str, List[Tuple[str, float]]]:
-    graph: Dict[str, List[Tuple[str, float]]] = {z["id"]: [] for z in venue["zones"]}
+def _adjacency(venue: dict[str, Any], accessible: bool) -> dict[str, list[tuple[str, float]]]:
+    graph: dict[str, list[tuple[str, float]]] = {z["id"]: [] for z in venue["zones"]}
     for frm, to, minutes, step_free in venue["edges"]:
         if accessible and not step_free:
             continue
@@ -53,12 +53,12 @@ def _adjacency(venue: Dict[str, Any], accessible: bool) -> Dict[str, List[Tuple[
 
 
 def _dijkstra(
-    venue: Dict[str, Any], origin: str, accessible: bool
-) -> Tuple[Dict[str, float], Dict[str, Optional[str]]]:
+    venue: dict[str, Any], origin: str, accessible: bool
+) -> tuple[dict[str, float], dict[str, str | None]]:
     graph = _adjacency(venue, accessible)
-    dist: Dict[str, float] = {origin: 0.0}
-    prev: Dict[str, Optional[str]] = {origin: None}
-    heap: List[Tuple[float, str]] = [(0.0, origin)]
+    dist: dict[str, float] = {origin: 0.0}
+    prev: dict[str, str | None] = {origin: None}
+    heap: list[tuple[float, str]] = [(0.0, origin)]
     while heap:
         d, node = heapq.heappop(heap)
         if d > dist.get(node, float("inf")):
@@ -73,8 +73,8 @@ def _dijkstra(
 
 
 def shortest_route(
-    venue: Dict[str, Any], origin_id: str, destination_id: str, accessible: bool = False
-) -> Optional[Route]:
+    venue: dict[str, Any], origin_id: str, destination_id: str, accessible: bool = False
+) -> Route | None:
     zones = zones_by_id(venue)
     if origin_id not in zones or destination_id not in zones:
         return None
@@ -85,26 +85,26 @@ def shortest_route(
     if destination_id not in dist:
         return None
 
-    path: List[str] = []
-    node: Optional[str] = destination_id
+    path: list[str] = []
+    node: str | None = destination_id
     while node is not None:
         path.append(node)
         node = prev[node]
     path.reverse()
 
     steps = [RouteStep(path[0], zones[path[0]]["name"], 0.0)]
-    for a, b in zip(path, path[1:]):
+    for a, b in zip(path, path[1:], strict=False):
         steps.append(RouteStep(b, zones[b]["name"], dist[b] - dist[a]))
     return Route(origin_id, destination_id, dist[destination_id], accessible, steps)
 
 
 def nearest_facilities(
-    venue: Dict[str, Any],
+    venue: dict[str, Any],
     origin_id: str,
     ftype: str,
     accessible: bool = False,
     limit: int = 3,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Facilities of a type ranked by walking time from ``origin_id``."""
     zones = zones_by_id(venue)
     if origin_id not in zones:

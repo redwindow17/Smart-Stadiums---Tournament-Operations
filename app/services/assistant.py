@@ -14,10 +14,11 @@ token usage low, and makes the whole pipeline testable without a network.
 """
 from __future__ import annotations
 
+import contextlib
 import logging
 import re
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from ..ai import nlu
 from ..ai.claude_engine import ClaudeEngine, EngineUnavailable
@@ -40,11 +41,11 @@ class Assistant:
     def __init__(self, settings: Settings):
         self.settings = settings
         self.local = LocalEngine()
-        self._claude: Optional[ClaudeEngine] = None
+        self._claude: ClaudeEngine | None = None
         self._claude_disabled = not settings.anthropic_api_key
 
     @property
-    def claude(self) -> Optional[ClaudeEngine]:
+    def claude(self) -> ClaudeEngine | None:
         if self._claude is None and not self._claude_disabled:
             try:
                 self._claude = ClaudeEngine(self.settings)
@@ -66,10 +67,10 @@ class Assistant:
         venue_id: str,
         language: str = "auto",
         accessible: bool = False,
-        location_zone: Optional[str] = None,
-        history: Optional[List[Dict[str, str]]] = None,
-        at: Optional[datetime] = None,
-    ) -> Dict[str, Any]:
+        location_zone: str | None = None,
+        history: list[dict[str, str]] | None = None,
+        at: datetime | None = None,
+    ) -> dict[str, Any]:
         venue = knowledge.get_venue(venue_id)  # raises UnknownVenueError
         msg = sanitize_text(message, self.settings.max_message_length)
         lang = nlu.detect_language(msg, language)
@@ -82,14 +83,14 @@ class Assistant:
         default_location = venue.get("default_location", venue["zones"][0]["id"])
         origin = location_zone if location_zone in zones else default_location
 
-        context: Dict[str, Any] = {
+        context: dict[str, Any] = {
             "venue": {"id": venue["id"], "name": venue["name"], "city": venue["city"], "country": venue["country"]},
             "language": lang,
             "intent": intent,
             "accessible": accessible,
             "origin_name": zones[origin]["name"],
         }
-        data: Dict[str, Any] = {}
+        data: dict[str, Any] = {}
         now = at or datetime.now(timezone.utc)
 
         if intent == "navigation":
@@ -138,7 +139,7 @@ class Assistant:
         context["crowd"] = crowd
 
     @staticmethod
-    def _orient(lowered: str, first: tuple, second: tuple) -> Tuple[str, str]:
+    def _orient(lowered: str, first: tuple, second: tuple) -> tuple[str, str]:
         """Decide origin vs destination for two mentioned zones.
 
         Default order is (first, second) - as in "from Gate A to the South
@@ -165,7 +166,7 @@ class Assistant:
         if facilities:
             data["facilities"] = facilities
 
-    def _crowd_lite(self, venue_id: str, now: datetime) -> Dict[str, Any]:
+    def _crowd_lite(self, venue_id: str, now: datetime) -> dict[str, Any]:
         snap = crowd_service.snapshot(venue_id, now)
         by_id = {z["zone_id"]: z for z in snap["zones"]}
         busiest = by_id.get(snap["busiest_gate"]) or {"zone_name": "-", "density": 0.0}
@@ -181,7 +182,7 @@ class Assistant:
             ],
         }
 
-    def _match_lite(self, venue_id: str, now: datetime) -> Optional[Dict[str, Any]]:
+    def _match_lite(self, venue_id: str, now: datetime) -> dict[str, Any] | None:
         match = knowledge.next_match(venue_id, now)
         if not match:
             return None
@@ -197,8 +198,8 @@ class Assistant:
     # -------------------------------------------------------------- generate
 
     def _generate(
-        self, message: str, context: Dict[str, Any], history: Optional[List[Dict[str, str]]]
-    ) -> Tuple[str, str]:
+        self, message: str, context: dict[str, Any], history: list[dict[str, str]] | None
+    ) -> tuple[str, str]:
         engine = self.claude
         if engine is not None:
             try:
@@ -209,16 +210,14 @@ class Assistant:
 
     # ------------------------------------------------------------------- ops
 
-    def ops_advisory(self, venue_id: str, at: Optional[datetime] = None) -> Dict[str, Any]:
+    def ops_advisory(self, venue_id: str, at: datetime | None = None) -> dict[str, Any]:
         snap = crowd_service.snapshot(venue_id, at)
         recs = crowd_service.recommendations(snap)
         engine = self.claude
         brief, engine_used = None, self.local.name
         if engine is not None:
-            try:
+            with contextlib.suppress(EngineUnavailable):
                 brief, engine_used = engine.ops_brief(snap, recs), engine.name
-            except EngineUnavailable:
-                pass
         if brief is None:
             brief = self.local.ops_brief(snap, recs)
         return {"snapshot": snap, "recommendations": recs, "brief": brief, "engine": engine_used}

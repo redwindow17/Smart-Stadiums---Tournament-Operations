@@ -15,7 +15,6 @@ import re
 import threading
 import time
 from collections import deque
-from typing import Deque, Dict
 
 # Everything except printable characters, newline and tab.
 _CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
@@ -37,7 +36,7 @@ class SlidingWindowRateLimiter:
         self.limit = limit
         self.window = window_seconds
         self.max_keys = max_keys
-        self._hits: Dict[str, Deque[float]] = {}
+        self._hits: dict[str, deque[float]] = {}
         self._lock = threading.Lock()
 
     def allow(self, key: str) -> bool:

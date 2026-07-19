@@ -14,7 +14,8 @@ host-country languages).
 from __future__ import annotations
 
 import re
-from typing import Iterable, Optional, Pattern
+from collections.abc import Iterable
+from re import Pattern
 
 LANGUAGES = ("en", "es", "fr")
 
@@ -120,7 +121,7 @@ def detect_language(text: str, requested: str = "auto") -> str:
     return "es" if es >= fr else "fr"
 
 
-def facility_type_from_text(text: str) -> Optional[str]:
+def facility_type_from_text(text: str) -> str | None:
     lowered = text.lower()
     for ftype, pattern in _FACILITY_PATTERNS.items():
         if pattern.search(lowered):
@@ -132,7 +133,7 @@ def wants_accessible(text: str) -> bool:
     return bool(_ACCESSIBLE.search(text.lower()))
 
 
-def classify_intent(text: str, facility_type: Optional[str], zone_mentions: int) -> str:
+def classify_intent(text: str, facility_type: str | None, zone_mentions: int) -> str:
     """Ordered rules: the most specific signal wins; greeting only fires when
     nothing else matched, so 'Hola, ¿dónde está la Puerta A?' is navigation."""
     lowered = text.lower()
