@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="StadiumIQ operations dashboard - crowd intelligence and incident triage">
+  <title>StadiumIQ - Operations Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%BD%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">&#9917;</span>
+      <div>
+        <h1>StadiumIQ Ops</h1>
+        <p class="tagline">Crowd intelligence &amp; real-time decision support</p>
+      </div>
+    </div>
+    <nav aria-label="Main">
+      <a class="nav-link" href="/">Fan assistant</a>
+    </nav>
+  </header>
+
+  <main id="main" class="ops-main">
+    <section class="controls" aria-label="Dashboard settings">
+      <div class="control">
+        <label for="venue-select">Stadium</label>
+        <select id="venue-select"></select>
+      </div>
+      <div class="control">
+        <button type="button" id="refresh-btn" class="secondary-btn">Refresh now</button>
+      </div>
+      <p id="phase-note" class="engine-note" role="status"></p>
+    </section>
+
+    <div class="ops-grid">
+      <section class="card" aria-labelledby="crowd-title">
+        <h2 id="crowd-title">Zone density</h2>
+        <div id="zone-list" class="zone-list" aria-live="polite"></div>
+      </section>
+
+      <section class="card" aria-labelledby="advisory-title">
+        <h2 id="advisory-title">AI situation brief</h2>
+        <pre id="brief" class="brief" aria-live="polite"></pre>
+        <h3>Recommended actions</h3>
+        <ul id="recommendations" class="rec-list"></ul>
+      </section>
+
+      <section class="card" aria-labelledby="incident-title">
+        <h2 id="incident-title">Report an incident</h2>
+        <form id="incident-form" class="incident-form">
+          <div class="control">
+            <label for="incident-zone">Zone</label>
+            <select id="incident-zone" required></select>
+          </div>
+          <div class="control">
+            <label for="incident-category">Category</label>
+            <select id="incident-category" required>
+              <option value="medical">Medical</option>
+              <option value="crowd_crush">Crowd crush risk</option>
+              <option value="fire_hazard">Fire hazard</option>
+              <option value="security">Security</option>
+              <option value="lost_child">Lost child</option>
+              <option value="accessibility">Accessibility</option>
+              <option value="technical">Technical</option>
+              <option value="cleaning">Cleaning</option>
+              <option value="lost_item">Lost item</option>
+            </select>
+          </div>
+          <div class="control">
+            <label for="incident-severity">Severity (1-5, optional)</label>
+            <input id="incident-severity" type="number" min="1" max="5" inputmode="numeric">
+          </div>
+          <div class="control control-wide">
+            <label for="incident-description">Description</label>
+            <textarea id="incident-description" rows="3" maxlength="500" required
+                      placeholder="What happened, and where exactly?"></textarea>
+          </div>
+          <button type="submit">Triage incident</button>
+          <p id="incident-status" role="status" class="engine-note"></p>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="log-title">
+        <h2 id="log-title">Incident log</h2>
+        <ul id="incident-list" class="incident-list" aria-live="polite"></ul>
+      </section>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <p>StadiumIQ demo - crowd densities are a deterministic simulation standing in for live sensor feeds.</p>
+  </footer>
+
+  <script src="/js/ops.js"></script>
+</body>
+</html>

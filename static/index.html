@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="StadiumIQ - GenAI matchday assistant for FIFA World Cup 2026 venues">
+  <title>StadiumIQ - Matchday Assistant</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%BD%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+  <a class="skip-link" href="#chat-input">Skip to message input</a>
+
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">&#9917;</span>
+      <div>
+        <h1>StadiumIQ</h1>
+        <p class="tagline">Your FIFA World Cup 2026 matchday assistant</p>
+      </div>
+    </div>
+    <nav aria-label="Main">
+      <a class="nav-link" href="/ops.html">Operations dashboard</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="controls" aria-label="Assistant settings">
+      <div class="control">
+        <label for="venue-select">Stadium</label>
+        <select id="venue-select"></select>
+      </div>
+      <div class="control">
+        <label for="location-select">I am at</label>
+        <select id="location-select"></select>
+      </div>
+      <div class="control">
+        <label for="language-select">Language</label>
+        <select id="language-select">
+          <option value="auto" selected>Auto-detect</option>
+          <option value="en">English</option>
+          <option value="es">Espa&ntilde;ol</option>
+          <option value="fr">Fran&ccedil;ais</option>
+        </select>
+      </div>
+      <div class="control control-checkbox">
+        <input type="checkbox" id="accessible-toggle">
+        <label for="accessible-toggle">Step-free routes only</label>
+      </div>
+    </section>
+
+    <section class="chat-panel" aria-label="Conversation with StadiumIQ">
+      <div id="chat-log" class="chat-log" role="log" aria-live="polite" aria-label="Messages"></div>
+      <p id="engine-note" class="engine-note" role="status"></p>
+
+      <div class="chips" role="group" aria-label="Quick questions">
+        <button type="button" class="chip" data-q="How do I get to Gate C?">Route to Gate C</button>
+        <button type="button" class="chip" data-q="Where is the nearest accessible restroom?">Accessible restroom</button>
+        <button type="button" class="chip" data-q="How crowded are the gates right now?">Crowd levels</button>
+        <button type="button" class="chip" data-q="What are my transport options to leave the stadium?">Transport</button>
+        <button type="button" class="chip" data-q="&iquest;D&oacute;nde est&aacute; la Puerta A?">&iquest;Puerta A?</button>
+        <button type="button" class="chip" data-q="When is kickoff and who plays?">Match info</button>
+      </div>
+
+      <form id="chat-form" class="chat-form">
+        <label class="visually-hidden" for="chat-input">Your message</label>
+        <input id="chat-input" name="message" type="text" autocomplete="off" maxlength="1000"
+               placeholder="Ask about routes, facilities, transport, crowds..." required>
+        <button id="send-btn" type="submit">Send</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>StadiumIQ demo - venue layouts and fixtures are illustrative sample data.</p>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

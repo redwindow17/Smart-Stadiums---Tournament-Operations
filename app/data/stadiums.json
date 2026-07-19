@@ -1,0 +1,267 @@
+{
+  "venues": [
+    {
+      "id": "azteca",
+      "name": "Estadio Azteca",
+      "city": "Mexico City",
+      "country": "Mexico",
+      "capacity": 87523,
+      "default_location": "transport_hub",
+      "zones": [
+        {"id": "transport_hub", "name": "Tren Ligero Station Plaza", "kind": "external", "aliases": ["tren ligero", "light rail", "station plaza", "estación", "estacion", "train station"]},
+        {"id": "parking", "name": "Official Parking P1-P4", "kind": "external", "aliases": ["parking", "estacionamiento", "car park", "parking lot"]},
+        {"id": "fan_festival", "name": "FIFA Fan Festival Azteca", "kind": "external", "aliases": ["fan festival", "fan zone", "festival de aficionados"]},
+        {"id": "gate_a", "name": "Gate A (North)", "kind": "gate", "aliases": ["gate a", "puerta a", "porte a"]},
+        {"id": "gate_b", "name": "Gate B (East)", "kind": "gate", "aliases": ["gate b", "puerta b", "porte b"]},
+        {"id": "gate_c", "name": "Gate C (South)", "kind": "gate", "aliases": ["gate c", "puerta c", "porte c"]},
+        {"id": "gate_d", "name": "Gate D (West)", "kind": "gate", "aliases": ["gate d", "puerta d", "porte d"]},
+        {"id": "concourse_north", "name": "North Concourse", "kind": "concourse", "aliases": ["north concourse", "explanada norte", "esplanade nord"]},
+        {"id": "concourse_east", "name": "East Concourse", "kind": "concourse", "aliases": ["east concourse", "explanada este", "esplanade est"]},
+        {"id": "concourse_south", "name": "South Concourse", "kind": "concourse", "aliases": ["south concourse", "explanada sur", "esplanade sud"]},
+        {"id": "concourse_west", "name": "West Concourse", "kind": "concourse", "aliases": ["west concourse", "explanada oeste", "esplanade ouest"]},
+        {"id": "stand_north", "name": "North Stand (Sections 101-135)", "kind": "seating", "aliases": ["north stand", "section 1", "tribuna norte", "tribune nord"]},
+        {"id": "stand_south", "name": "South Stand (Sections 201-235)", "kind": "seating", "aliases": ["south stand", "section 2", "tribuna sur", "tribune sud"]}
+      ],
+      "edges": [
+        ["transport_hub", "gate_a", 6, true],
+        ["transport_hub", "gate_b", 8, true],
+        ["parking", "gate_c", 5, true],
+        ["parking", "gate_d", 7, true],
+        ["fan_festival", "transport_hub", 4, true],
+        ["fan_festival", "gate_a", 7, true],
+        ["gate_a", "concourse_north", 2, true],
+        ["gate_b", "concourse_east", 2, true],
+        ["gate_c", "concourse_south", 2, true],
+        ["gate_d", "concourse_west", 2, true],
+        ["concourse_north", "concourse_east", 3, false],
+        ["concourse_north", "concourse_east", 5, true],
+        ["concourse_east", "concourse_south", 3, true],
+        ["concourse_south", "concourse_west", 3, false],
+        ["concourse_south", "concourse_west", 5, true],
+        ["concourse_west", "concourse_north", 3, true],
+        ["concourse_north", "stand_north", 2, false],
+        ["concourse_north", "stand_north", 4, true],
+        ["concourse_south", "stand_south", 2, false],
+        ["concourse_south", "stand_south", 4, true]
+      ],
+      "facilities": [
+        {"type": "restroom", "name": "North Concourse Restrooms", "zone": "concourse_north"},
+        {"type": "restroom", "name": "East Concourse Restrooms", "zone": "concourse_east"},
+        {"type": "restroom", "name": "South Concourse Restrooms", "zone": "concourse_south"},
+        {"type": "accessible_restroom", "name": "Accessible Restrooms (North)", "zone": "concourse_north"},
+        {"type": "accessible_restroom", "name": "Accessible Restrooms (West)", "zone": "concourse_west"},
+        {"type": "water_refill", "name": "Agua Refill Point East", "zone": "concourse_east"},
+        {"type": "water_refill", "name": "Agua Refill Point South", "zone": "concourse_south"},
+        {"type": "water_refill", "name": "Fan Festival Hydration Hub", "zone": "fan_festival"},
+        {"type": "first_aid", "name": "First Aid North (Cruz Roja)", "zone": "concourse_north"},
+        {"type": "first_aid", "name": "First Aid South (Cruz Roja)", "zone": "concourse_south"},
+        {"type": "food", "name": "Mercado Azteca Food Hall", "zone": "concourse_east"},
+        {"type": "food", "name": "Antojitos West", "zone": "concourse_west"},
+        {"type": "prayer_room", "name": "Multi-faith Prayer Room", "zone": "concourse_west"},
+        {"type": "sensory_room", "name": "Sensory Room (North)", "zone": "concourse_north"},
+        {"type": "info_desk", "name": "Info Desk Gate A", "zone": "gate_a"},
+        {"type": "info_desk", "name": "Info Desk South", "zone": "concourse_south"},
+        {"type": "atm", "name": "ATM Cluster East", "zone": "concourse_east"},
+        {"type": "charging", "name": "Charging Lockers West", "zone": "concourse_west"}
+      ],
+      "transport": [
+        {"mode": "rail", "name": "Tren Ligero - Estadio Azteca station", "detail": "Direct light rail from Tasqueña (Metro Line 2 interchange), every 5 min on matchdays, ~20 min ride."},
+        {"mode": "metro_shuttle", "name": "Metro + Shuttle", "detail": "Metro to Universidad (Line 3), then free matchday shuttle to the stadium, ~15 min."},
+        {"mode": "bus", "name": "Official Fan Buses", "detail": "From Zócalo and Auditorio Nacional, ticket holders only, departures 4h to 1h before kickoff."},
+        {"mode": "parking", "name": "Pre-booked Parking P1-P4", "detail": "Must be reserved online in advance; car-free zone applies within 1 km on matchdays."}
+      ],
+      "accessibility": {
+        "summary": "Estadio Azteca offers step-free routes from the Tren Ligero plaza to all four gates, with elevators at every concourse.",
+        "features": [
+          "Wheelchair viewing platforms in the North and South stands (book via ticket portal)",
+          "Elevators at Gates A-D and ramps on all concourse connections",
+          "Accessible restrooms in the North and West concourses",
+          "Sensory room with trained staff in the North Concourse",
+          "Accessible drop-off point at the Tren Ligero plaza",
+          "Hearing-loop equipped Info Desks at Gate A and the South Concourse"
+        ]
+      },
+      "sustainability": [
+        "Bring a reusable bottle: free refill points in the East and South concourses and the Fan Festival.",
+        "Three-stream waste stations (recycling / compost / landfill) at every concourse.",
+        "Arrive by Tren Ligero or shuttle: a car-free zone applies around the stadium on matchdays.",
+        "Concession packaging is 100% compostable at this venue."
+      ]
+    },
+    {
+      "id": "metlife",
+      "name": "MetLife Stadium (New York New Jersey Stadium)",
+      "city": "East Rutherford, NJ",
+      "country": "United States",
+      "capacity": 82500,
+      "default_location": "transport_hub",
+      "zones": [
+        {"id": "transport_hub", "name": "Meadowlands Rail Station", "kind": "external", "aliases": ["rail station", "train station", "meadowlands station", "nj transit", "estación de tren", "gare"]},
+        {"id": "parking", "name": "Parking Lots E-K", "kind": "external", "aliases": ["parking", "lot e", "lot k", "estacionamiento", "stationnement"]},
+        {"id": "fan_festival", "name": "FIFA Fan Festival Meadowlands", "kind": "external", "aliases": ["fan festival", "fan zone", "festival"]},
+        {"id": "gate_a", "name": "VIP Gate A (South-West)", "kind": "gate", "aliases": ["gate a", "vip gate", "puerta a", "porte a"]},
+        {"id": "gate_b", "name": "Gate B (North-West)", "kind": "gate", "aliases": ["gate b", "puerta b", "porte b"]},
+        {"id": "gate_c", "name": "Gate C (North-East)", "kind": "gate", "aliases": ["gate c", "puerta c", "porte c"]},
+        {"id": "gate_d", "name": "Gate D (South-East)", "kind": "gate", "aliases": ["gate d", "puerta d", "porte d"]},
+        {"id": "concourse_north", "name": "North Great Hall", "kind": "concourse", "aliases": ["north great hall", "great hall", "north concourse"]},
+        {"id": "concourse_east", "name": "East Concourse", "kind": "concourse", "aliases": ["east concourse", "explanada este", "esplanade est"]},
+        {"id": "concourse_south", "name": "South Concourse", "kind": "concourse", "aliases": ["south concourse", "explanada sur", "esplanade sud"]},
+        {"id": "concourse_west", "name": "West Concourse", "kind": "concourse", "aliases": ["west concourse", "explanada oeste", "esplanade ouest"]},
+        {"id": "stand_north", "name": "North Stand (Sections 101-129)", "kind": "seating", "aliases": ["north stand", "section 1", "tribuna norte", "tribune nord"]},
+        {"id": "stand_south", "name": "South Stand (Sections 201-229)", "kind": "seating", "aliases": ["south stand", "section 2", "tribuna sur", "tribune sud"]}
+      ],
+      "edges": [
+        ["transport_hub", "gate_b", 7, true],
+        ["transport_hub", "gate_c", 9, true],
+        ["parking", "gate_a", 6, true],
+        ["parking", "gate_d", 5, true],
+        ["fan_festival", "transport_hub", 5, true],
+        ["fan_festival", "gate_b", 8, true],
+        ["gate_a", "concourse_west", 2, true],
+        ["gate_b", "concourse_north", 2, true],
+        ["gate_c", "concourse_east", 2, true],
+        ["gate_d", "concourse_south", 2, true],
+        ["concourse_north", "concourse_east", 4, false],
+        ["concourse_north", "concourse_east", 6, true],
+        ["concourse_east", "concourse_south", 4, true],
+        ["concourse_south", "concourse_west", 4, false],
+        ["concourse_south", "concourse_west", 6, true],
+        ["concourse_west", "concourse_north", 4, true],
+        ["concourse_north", "stand_north", 2, false],
+        ["concourse_north", "stand_north", 4, true],
+        ["concourse_south", "stand_south", 2, false],
+        ["concourse_south", "stand_south", 4, true]
+      ],
+      "facilities": [
+        {"type": "restroom", "name": "Great Hall Restrooms", "zone": "concourse_north"},
+        {"type": "restroom", "name": "East Concourse Restrooms", "zone": "concourse_east"},
+        {"type": "restroom", "name": "South Concourse Restrooms", "zone": "concourse_south"},
+        {"type": "accessible_restroom", "name": "Accessible Restrooms (Great Hall)", "zone": "concourse_north"},
+        {"type": "accessible_restroom", "name": "Accessible Restrooms (South)", "zone": "concourse_south"},
+        {"type": "water_refill", "name": "Hydration Station East", "zone": "concourse_east"},
+        {"type": "water_refill", "name": "Hydration Station West", "zone": "concourse_west"},
+        {"type": "water_refill", "name": "Rail Plaza Refill Point", "zone": "transport_hub"},
+        {"type": "first_aid", "name": "First Aid - Great Hall", "zone": "concourse_north"},
+        {"type": "first_aid", "name": "First Aid - South", "zone": "concourse_south"},
+        {"type": "food", "name": "Boardwalk Eats (East)", "zone": "concourse_east"},
+        {"type": "food", "name": "Jersey Grill (West)", "zone": "concourse_west"},
+        {"type": "prayer_room", "name": "Interfaith Room", "zone": "concourse_west"},
+        {"type": "sensory_room", "name": "Sensory Inclusion Room", "zone": "concourse_north"},
+        {"type": "info_desk", "name": "Guest Services Gate B", "zone": "gate_b"},
+        {"type": "info_desk", "name": "Guest Services South", "zone": "concourse_south"},
+        {"type": "atm", "name": "ATM - East Concourse", "zone": "concourse_east"},
+        {"type": "charging", "name": "Charging Bar West", "zone": "concourse_west"}
+      ],
+      "transport": [
+        {"mode": "rail", "name": "NJ Transit Meadowlands Rail", "detail": "From Secaucus Junction (connections from New York Penn Station), trains every 10 min from 4h before kickoff."},
+        {"mode": "bus", "name": "Coach USA 351 Meadowlands Express", "detail": "From Port Authority Bus Terminal (NYC), ~30 min, runs matchdays only."},
+        {"mode": "parking", "name": "Pre-booked Parking (Lots E-K)", "detail": "Parking must be reserved online in advance; tailgating areas open 5h before kickoff."},
+        {"mode": "rideshare", "name": "Rideshare Lot W", "detail": "Designated pickup/drop-off at Lot W, a 10-minute signed walk from Gate A."}
+      ],
+      "accessibility": {
+        "summary": "MetLife Stadium provides step-free access from the rail station and all parking lots to every gate, with elevators throughout.",
+        "features": [
+          "Wheelchair and companion seating on all levels (book via ticket portal)",
+          "Elevators behind Gates A-D; all concourse links have ramp alternatives",
+          "Accessible restrooms in the Great Hall and South Concourse",
+          "Sensory inclusion room with certified staff in the Great Hall",
+          "Accessible shuttle from Lot K to Gate D on request",
+          "Assistive listening devices at both Guest Services desks"
+        ]
+      },
+      "sustainability": [
+        "Refill stations at the rail plaza and both side concourses - bring an empty reusable bottle.",
+        "MetLife runs zero-waste concourses: all packaging is recyclable or compostable.",
+        "Take the Meadowlands Rail: it is the fastest route and cuts matchday emissions.",
+        "Solar array and wind turbines on-site offset part of the stadium's energy use."
+      ]
+    },
+    {
+      "id": "bcplace",
+      "name": "BC Place",
+      "city": "Vancouver",
+      "country": "Canada",
+      "capacity": 54500,
+      "default_location": "transport_hub",
+      "zones": [
+        {"id": "transport_hub", "name": "Stadium-Chinatown SkyTrain Station", "kind": "external", "aliases": ["skytrain", "stadium-chinatown", "station", "estación", "gare"]},
+        {"id": "parking", "name": "City Parkades (Georgia St)", "kind": "external", "aliases": ["parking", "parkade", "estacionamiento", "stationnement"]},
+        {"id": "fan_festival", "name": "FIFA Fan Festival Vancouver", "kind": "external", "aliases": ["fan festival", "fan zone", "festival"]},
+        {"id": "gate_a", "name": "Gate A (Terry Fox Plaza)", "kind": "gate", "aliases": ["gate a", "terry fox", "puerta a", "porte a"]},
+        {"id": "gate_b", "name": "Gate B (Pacific Blvd)", "kind": "gate", "aliases": ["gate b", "puerta b", "porte b"]},
+        {"id": "gate_c", "name": "Gate C (Expo Blvd)", "kind": "gate", "aliases": ["gate c", "puerta c", "porte c"]},
+        {"id": "gate_d", "name": "Gate D (South Plaza)", "kind": "gate", "aliases": ["gate d", "puerta d", "porte d"]},
+        {"id": "concourse_north", "name": "North Concourse (Level 2)", "kind": "concourse", "aliases": ["north concourse", "explanada norte", "esplanade nord"]},
+        {"id": "concourse_east", "name": "East Concourse (Level 2)", "kind": "concourse", "aliases": ["east concourse", "explanada este", "esplanade est"]},
+        {"id": "concourse_south", "name": "South Concourse (Level 2)", "kind": "concourse", "aliases": ["south concourse", "explanada sur", "esplanade sud"]},
+        {"id": "concourse_west", "name": "West Concourse (Level 2)", "kind": "concourse", "aliases": ["west concourse", "explanada oeste", "esplanade ouest"]},
+        {"id": "stand_north", "name": "North Stand (Sections 201-227)", "kind": "seating", "aliases": ["north stand", "tribuna norte", "tribune nord"]},
+        {"id": "stand_south", "name": "South Stand (Sections 235-261)", "kind": "seating", "aliases": ["south stand", "tribuna sur", "tribune sud"]}
+      ],
+      "edges": [
+        ["transport_hub", "gate_a", 4, true],
+        ["transport_hub", "gate_c", 6, true],
+        ["parking", "gate_b", 6, true],
+        ["parking", "gate_d", 8, true],
+        ["fan_festival", "transport_hub", 6, true],
+        ["fan_festival", "gate_a", 5, true],
+        ["gate_a", "concourse_north", 2, true],
+        ["gate_b", "concourse_west", 2, true],
+        ["gate_c", "concourse_east", 2, true],
+        ["gate_d", "concourse_south", 2, true],
+        ["concourse_north", "concourse_east", 3, false],
+        ["concourse_north", "concourse_east", 5, true],
+        ["concourse_east", "concourse_south", 3, true],
+        ["concourse_south", "concourse_west", 3, false],
+        ["concourse_south", "concourse_west", 5, true],
+        ["concourse_west", "concourse_north", 3, true],
+        ["concourse_north", "stand_north", 2, false],
+        ["concourse_north", "stand_north", 4, true],
+        ["concourse_south", "stand_south", 2, false],
+        ["concourse_south", "stand_south", 4, true]
+      ],
+      "facilities": [
+        {"type": "restroom", "name": "North Concourse Restrooms", "zone": "concourse_north"},
+        {"type": "restroom", "name": "East Concourse Restrooms", "zone": "concourse_east"},
+        {"type": "restroom", "name": "West Concourse Restrooms", "zone": "concourse_west"},
+        {"type": "accessible_restroom", "name": "Accessible Restrooms (North)", "zone": "concourse_north"},
+        {"type": "accessible_restroom", "name": "Accessible Restrooms (East)", "zone": "concourse_east"},
+        {"type": "water_refill", "name": "Refill Station North", "zone": "concourse_north"},
+        {"type": "water_refill", "name": "Refill Station South", "zone": "concourse_south"},
+        {"type": "first_aid", "name": "First Aid - East", "zone": "concourse_east"},
+        {"type": "first_aid", "name": "First Aid - West", "zone": "concourse_west"},
+        {"type": "food", "name": "Pacific Poke & Grill (North)", "zone": "concourse_north"},
+        {"type": "food", "name": "Gastown Eats (South)", "zone": "concourse_south"},
+        {"type": "prayer_room", "name": "Quiet & Prayer Room", "zone": "concourse_east"},
+        {"type": "sensory_room", "name": "Sensory Room (West)", "zone": "concourse_west"},
+        {"type": "info_desk", "name": "Fan Services Gate A", "zone": "gate_a"},
+        {"type": "info_desk", "name": "Fan Services East", "zone": "concourse_east"},
+        {"type": "atm", "name": "ATM - South Concourse", "zone": "concourse_south"},
+        {"type": "charging", "name": "Charging Wall North", "zone": "concourse_north"}
+      ],
+      "transport": [
+        {"mode": "rail", "name": "SkyTrain Expo Line - Stadium-Chinatown", "detail": "Two blocks from Gate A; extra trains run until 90 min after the final whistle."},
+        {"mode": "bus", "name": "TransLink buses (Robson / Main St)", "detail": "Frequent routes 5, 17 and 19 stop within a 6-minute walk."},
+        {"mode": "ferry", "name": "False Creek Ferries", "detail": "Dock at Plaza of Nations, a scenic 8-minute walk to Gate D."},
+        {"mode": "parking", "name": "City Parkades", "detail": "No on-site public parking; use Georgia St parkades and walk 10-12 min."}
+      ],
+      "accessibility": {
+        "summary": "BC Place is fully step-free: every gate connects to the Level 2 concourse by ramp or elevator.",
+        "features": [
+          "Wheelchair seating with sightline guarantees on every level",
+          "Elevators at Gates A, B and C; ramped route at Gate D",
+          "Accessible restrooms in the North and East concourses",
+          "Sensory room (West Concourse) - sensory kits at Fan Services",
+          "Accessible drop-off zone on Expo Blvd next to Gate C",
+          "All concession counters have a lowered accessible section"
+        ]
+      },
+      "sustainability": [
+        "BC Place targets zero-waste: sorted waste stations sit every 50 m on the concourses.",
+        "Refill stations in the North and South concourses - single-use bottles are not sold.",
+        "SkyTrain and ferries are the recommended low-carbon ways to arrive.",
+        "The stadium roof collects rainwater used for pitch irrigation."
+      ]
+    }
+  ]
+}

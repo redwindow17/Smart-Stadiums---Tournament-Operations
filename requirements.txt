@@ -1,0 +1,11 @@
+# Runtime
+fastapi>=0.111
+uvicorn[standard]>=0.30
+pydantic>=2.7
+
+# Optional GenAI provider (app degrades gracefully to offline demo mode without it)
+anthropic>=0.40
+
+# Testing
+pytest>=8.2
+httpx>=0.27
