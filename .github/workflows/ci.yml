@@ -28,5 +28,11 @@ jobs:
       - name: Lint (ruff)
         run: ruff check app tests run.py api
 
-      - name: Run tests
-        run: pytest
+      - name: Type-check (mypy)
+        run: mypy
+
+      - name: Tests with coverage gate
+        run: pytest --cov=app --cov-fail-under=95
+
+      - name: Dependency vulnerability audit (pip-audit)
+        run: pip-audit -r requirements.txt

@@ -1,25 +1,18 @@
 /* StadiumIQ operations dashboard - dependency-free, CSP-safe.
    Zone meters are rendered via CSSOM (el.style.width), all text via
-   textContent, so no markup injection is possible. */
+   textContent, so no markup injection is possible.
+   Shared helpers ($, fetchJSON) come from common.js. */
 "use strict";
 
-const $ = (id) => document.getElementById(id);
 const REFRESH_MS = 15000;
+/** @type {string|null} */
 let venueId = null;
+/** @type {number|null} */
 let timer = null;
-
-async function fetchJSON(url, options) {
-  const res = await fetch(url, options);
-  if (!res.ok) {
-    let detail = res.statusText;
-    try { detail = (await res.json()).detail || detail; } catch (_) { /* keep statusText */ }
-    throw new Error(detail);
-  }
-  return res.json();
-}
 
 /* ------------------------------ setup ---------------------------------- */
 
+/** Populate the venue selector and open the first venue's dashboard. */
 async function loadVenues() {
   const data = await fetchJSON("/api/venues");
   const select = $("venue-select");
@@ -33,6 +26,11 @@ async function loadVenues() {
   await switchVenue(select.value);
 }
 
+/**
+ * Switch the dashboard to a venue: fill the incident-zone selector, refresh
+ * both panels and (re)start the auto-refresh timer.
+ * @param {string} id
+ */
 async function switchVenue(id) {
   venueId = id;
   const venue = await fetchJSON(`/api/venues/${encodeURIComponent(id)}`);
@@ -51,6 +49,7 @@ async function switchVenue(id) {
 
 /* ---------------------------- dashboard --------------------------------- */
 
+/** Fetch the advisory (snapshot + recommendations + AI brief) and render it. */
 async function refreshDashboard() {
   if (!venueId) return;
   const data = await fetchJSON(`/api/ops/advisory?venue_id=${encodeURIComponent(venueId)}`);
@@ -108,6 +107,7 @@ async function refreshDashboard() {
 
 /* ---------------------------- incidents --------------------------------- */
 
+/** Reload the incident log for the current venue. */
 async function refreshIncidents() {
   if (!venueId) return;
   const data = await fetchJSON(`/api/ops/incidents?venue_id=${encodeURIComponent(venueId)}`);
@@ -134,6 +134,10 @@ async function refreshIncidents() {
   }
 }
 
+/**
+ * Submit the incident form for triage and show the resulting priority.
+ * @param {SubmitEvent} event
+ */
 async function submitIncident(event) {
   event.preventDefault();
   const status = $("incident-status");

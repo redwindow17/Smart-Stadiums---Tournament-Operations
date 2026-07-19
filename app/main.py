@@ -5,9 +5,12 @@
 """
 from __future__ import annotations
 
+import logging
+from collections.abc import Awaitable, Callable
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import __version__
@@ -16,6 +19,8 @@ from .config import Settings, load_settings
 from .security import SECURITY_HEADERS, SlidingWindowRateLimiter
 from .services.assistant import Assistant
 from .services.incidents import IncidentLog
+
+logger = logging.getLogger("stadiumiq.app")
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
@@ -32,8 +37,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.assistant = Assistant(settings)
     app.state.incidents = IncidentLog()
 
+    @app.exception_handler(Exception)
+    async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+        """Last-resort handler: log the full error server-side, return a
+        generic message so internals (paths, config, stack traces) never
+        reach a client."""
+        logger.exception("Unhandled error on %s %s", request.method, request.url.path)
+        return JSONResponse(status_code=500, content={"detail": "Internal server error"})
+
     @app.middleware("http")
-    async def security_headers(request, call_next):
+    async def security_headers(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         response = await call_next(request)
         for header, value in SECURITY_HEADERS.items():
             # Swagger UI pulls its assets from a CDN, so CSP would blank the
@@ -41,6 +56,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             if header == "Content-Security-Policy" and request.url.path.startswith(("/docs", "/redoc")):
                 continue
             response.headers.setdefault(header, value)
+        # API responses can embed user-supplied text - never cache them.
+        if request.url.path.startswith("/api/"):
+            response.headers.setdefault("Cache-Control", "no-store")
         return response
 
     app.include_router(routes_meta.router)

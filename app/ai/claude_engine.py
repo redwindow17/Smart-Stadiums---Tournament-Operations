@@ -14,12 +14,22 @@ product never hard-fails on the AI dependency.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 from ..config import Settings
 from .prompts import OPS_SYSTEM_PROMPT, SYSTEM_PROMPT, build_ops_prompt, build_user_prompt
 
+if TYPE_CHECKING:  # only for type checking - the SDK is an optional runtime dep
+    from collections.abc import Iterable
+
+    from anthropic.types import MessageParam
+
 logger = logging.getLogger("stadiumiq.ai")
+
+# Output caps: chat replies are a short paragraph plus bullets; ops briefs are
+# a 2-3 sentence assessment plus prioritised actions. Both fit comfortably.
+CHAT_MAX_TOKENS = 700
+OPS_BRIEF_MAX_TOKENS = 500
 
 
 class EngineUnavailable(RuntimeError):
@@ -49,7 +59,9 @@ class ClaudeEngine:
                 model=self._model,
                 max_tokens=max_tokens,
                 system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
-                messages=messages,
+                # Plain role/content dicts match the SDK's MessageParam TypedDict
+                # at runtime; the cast bridges our looser dict[str, Any] history.
+                messages=cast("Iterable[MessageParam]", messages),
             )
         except Exception as exc:  # any SDK/network error -> graceful fallback
             logger.warning("Claude request failed, falling back to local engine: %s", exc)
@@ -72,8 +84,8 @@ class ClaudeEngine:
         for turn in history or []:
             messages.append({"role": turn["role"], "content": turn["content"]})
         messages.append({"role": "user", "content": build_user_prompt(context, message)})
-        return self._call(SYSTEM_PROMPT, messages, max_tokens=700)
+        return self._call(SYSTEM_PROMPT, messages, max_tokens=CHAT_MAX_TOKENS)
 
     def ops_brief(self, snapshot: dict[str, Any], recommendations: list[dict[str, str]]) -> str:
         messages = [{"role": "user", "content": build_ops_prompt(snapshot, recommendations)}]
-        return self._call(OPS_SYSTEM_PROMPT, messages, max_tokens=500)
+        return self._call(OPS_SYSTEM_PROMPT, messages, max_tokens=OPS_BRIEF_MAX_TOKENS)

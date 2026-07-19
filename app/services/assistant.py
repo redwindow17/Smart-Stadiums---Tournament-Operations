@@ -118,7 +118,16 @@ class Assistant:
 
     # -------------------------------------------------------------- grounding
 
-    def _ground_navigation(self, context, data, venue, msg, origin, accessible, now) -> None:
+    def _ground_navigation(
+        self,
+        context: dict[str, Any],
+        data: dict[str, Any],
+        venue: dict[str, Any],
+        msg: str,
+        origin: str,
+        accessible: bool,
+        now: datetime,
+    ) -> None:
         mentions = knowledge.find_zone_positions(venue, msg)
         if len(mentions) >= 2:
             origin_id, dest_id = self._orient(msg.lower(), mentions[0], mentions[1])
@@ -139,21 +148,29 @@ class Assistant:
         context["crowd"] = crowd
 
     @staticmethod
-    def _orient(lowered: str, first: tuple, second: tuple) -> tuple[str, str]:
+    def _orient(lowered: str, first: tuple[str, int], second: tuple[str, int]) -> tuple[str, str]:
         """Decide origin vs destination for two mentioned zones.
 
         Default order is (first, second) - as in "from Gate A to the South
         Concourse" - but cue words flip it for "way to X from Y" phrasing.
         """
 
-        def preceding_tokens(index: int) -> set:
+        def preceding_tokens(index: int) -> set[str]:
             return set(_TOKEN.findall(lowered[:index])[-2:])
 
         if (_TO_CUES & preceding_tokens(first[1])) or (_FROM_CUES & preceding_tokens(second[1])):
             return second[0], first[0]
         return first[0], second[0]
 
-    def _ground_facility(self, context, data, venue, origin, ftype, accessible) -> None:
+    def _ground_facility(
+        self,
+        context: dict[str, Any],
+        data: dict[str, Any],
+        venue: dict[str, Any],
+        origin: str,
+        ftype: str | None,
+        accessible: bool,
+    ) -> None:
         effective = ftype or "info_desk"
         if effective == "restroom" and accessible and knowledge.facilities_of_type(venue, "accessible_restroom"):
             effective = "accessible_restroom"
@@ -214,7 +231,8 @@ class Assistant:
         snap = crowd_service.snapshot(venue_id, at)
         recs = crowd_service.recommendations(snap)
         engine = self.claude
-        brief, engine_used = None, self.local.name
+        brief: str | None = None
+        engine_used = self.local.name
         if engine is not None:
             with contextlib.suppress(EngineUnavailable):
                 brief, engine_used = engine.ops_brief(snap, recs), engine.name

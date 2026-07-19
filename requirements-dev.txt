@@ -1,4 +1,7 @@
 # Development / CI tooling. Runtime deps live in requirements.txt.
 -r requirements.txt
 
-ruff>=0.6      # lint + import sorting (config in pyproject.toml)
+ruff==0.15.22       # lint + import sorting (config in pyproject.toml)
+mypy==2.3.0         # static type checking (config in pyproject.toml)
+pytest-cov==7.1.0   # coverage measurement + CI gate
+pip-audit==2.10.1   # dependency vulnerability scanning in CI

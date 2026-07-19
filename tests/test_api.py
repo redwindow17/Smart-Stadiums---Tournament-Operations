@@ -1,4 +1,17 @@
 """End-to-end API tests (offline engine, in-process TestClient)."""
+from typing import get_args
+
+from app.api.schemas import IncidentRequest
+from app.services.incidents import CATEGORY_WEIGHTS, PLAYBOOK
+
+
+def test_incident_category_definitions_stay_in_sync():
+    """The schema's Literal, the triage weights and the playbook must always
+    describe the same category set - this test enforces that single source
+    of truth across modules."""
+    schema_categories = set(get_args(IncidentRequest.model_fields["category"].annotation))
+    assert schema_categories == set(CATEGORY_WEIGHTS)
+    assert set(PLAYBOOK) == set(CATEGORY_WEIGHTS)
 
 
 def test_health(client):

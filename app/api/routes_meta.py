@@ -1,23 +1,19 @@
 """Health check and venue metadata endpoints."""
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Request
+from typing import Any
+
+from fastapi import APIRouter, Request
 
 from .. import __version__
 from ..services import knowledge
+from .deps import venue_or_404
 
 router = APIRouter(prefix="/api", tags=["meta"])
 
 
-def _venue_or_404(venue_id: str) -> dict:
-    try:
-        return knowledge.get_venue(venue_id)
-    except knowledge.UnknownVenueError:
-        raise HTTPException(status_code=404, detail="Unknown venue") from None
-
-
 @router.get("/health")
-def health(request: Request) -> dict:
+def health(request: Request) -> dict[str, Any]:
     return {
         "status": "ok",
         "version": __version__,
@@ -26,13 +22,13 @@ def health(request: Request) -> dict:
 
 
 @router.get("/venues")
-def venues() -> dict:
+def venues() -> dict[str, Any]:
     return {"venues": knowledge.list_venues()}
 
 
 @router.get("/venues/{venue_id}")
-def venue_detail(venue_id: str) -> dict:
-    venue = _venue_or_404(venue_id)
+def venue_detail(venue_id: str) -> dict[str, Any]:
+    venue = venue_or_404(venue_id)
     return {
         "id": venue["id"],
         "name": venue["name"],
@@ -49,11 +45,17 @@ def venue_detail(venue_id: str) -> dict:
 
 
 @router.get("/venues/{venue_id}/matches")
-def venue_matches(venue_id: str) -> dict:
-    _venue_or_404(venue_id)
+def venue_matches(venue_id: str) -> dict[str, Any]:
+    venue_or_404(venue_id)
     return {
         "matches": [
-            {"id": m["id"], "stage": m["stage"], "home": m["home"], "away": m["away"], "kickoff_utc": m["kickoff_utc"]}
+            {
+                "id": m["id"],
+                "stage": m["stage"],
+                "home": m["home"],
+                "away": m["away"],
+                "kickoff_utc": m["kickoff_utc"],
+            }
             for m in knowledge.matches_for_venue(venue_id)
         ]
     }

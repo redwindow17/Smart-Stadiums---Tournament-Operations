@@ -13,6 +13,10 @@ from __future__ import annotations
 
 from typing import Any
 
+# Only surface the "quieter gate" hint inside route answers once the busiest
+# gate is meaningfully loaded; below this the hint is noise.
+CROWD_HINT_THRESHOLD_PCT = 60
+
 PHRASES: dict[str, dict[str, Any]] = {
     "en": {
         "greeting": "Hi! I'm StadiumIQ, your matchday assistant at {venue}. Ask me about routes, facilities, transport, crowd levels, accessibility or today's match.",
@@ -129,13 +133,13 @@ class LocalEngine:
 
     # --- intent renderers -------------------------------------------------
 
-    def _greeting(self, ctx, p, venue) -> str:
+    def _greeting(self, ctx: dict[str, Any], p: dict[str, Any], venue: str) -> str:
         return p["greeting"].format(venue=venue)
 
-    def _general(self, ctx, p, venue) -> str:
+    def _general(self, ctx: dict[str, Any], p: dict[str, Any], venue: str) -> str:
         return p["general"].format(venue=venue)
 
-    def _navigation(self, ctx, p, venue) -> str:
+    def _navigation(self, ctx: dict[str, Any], p: dict[str, Any], venue: str) -> str:
         route = ctx.get("route")
         acc = p["acc_word"] if ctx.get("accessible") else ""
         if not ctx.get("route_requested"):
@@ -154,7 +158,7 @@ class LocalEngine:
             lines.append(hint)
         return "\n".join(lines)
 
-    def _facility(self, ctx, p, venue) -> str:
+    def _facility(self, ctx: dict[str, Any], p: dict[str, Any], venue: str) -> str:
         facilities = ctx.get("facilities") or []
         if not facilities:
             return p["facility_none"]
@@ -168,7 +172,7 @@ class LocalEngine:
             lines.append(p["medical_note"])
         return "\n".join(lines)
 
-    def _crowd(self, ctx, p, venue) -> str:
+    def _crowd(self, ctx: dict[str, Any], p: dict[str, Any], venue: str) -> str:
         crowd = ctx.get("crowd")
         if not crowd:
             return p["general"].format(venue=venue)
@@ -183,14 +187,14 @@ class LocalEngine:
         )
         return text + "\n" + p["crowd_tip"].format(quietest=crowd["quietest"]["name"])
 
-    def _transport(self, ctx, p, venue) -> str:
+    def _transport(self, ctx: dict[str, Any], p: dict[str, Any], venue: str) -> str:
         options = ctx.get("transport") or []
         lines = [p["transport_intro"].format(venue=venue)]
         for opt in options:
             lines.append(f"- {opt['name']}: {opt['detail']}")
         return "\n".join(lines)
 
-    def _match(self, ctx, p, venue) -> str:
+    def _match(self, ctx: dict[str, Any], p: dict[str, Any], venue: str) -> str:
         match = ctx.get("match")
         if not match:
             return p["match_none"].format(venue=venue)
@@ -199,7 +203,7 @@ class LocalEngine:
             venue=venue, stage=match["stage"], home=match["home"], away=match["away"], kickoff=match["kickoff"]
         )
 
-    def _accessibility(self, ctx, p, venue) -> str:
+    def _accessibility(self, ctx: dict[str, Any], p: dict[str, Any], venue: str) -> str:
         info = ctx.get("accessibility") or {}
         lines = [p["accessibility_intro"].format(venue=venue)]
         if info.get("summary"):
@@ -208,7 +212,7 @@ class LocalEngine:
             lines.append(f"- {feature}")
         return "\n".join(lines)
 
-    def _sustainability(self, ctx, p, venue) -> str:
+    def _sustainability(self, ctx: dict[str, Any], p: dict[str, Any], venue: str) -> str:
         tips = ctx.get("sustainability") or []
         lines = [p["sustainability_intro"].format(venue=venue)]
         for tip in tips:
@@ -218,9 +222,9 @@ class LocalEngine:
     # --- helpers ----------------------------------------------------------
 
     @staticmethod
-    def _crowd_hint(ctx, p) -> str:
+    def _crowd_hint(ctx: dict[str, Any], p: dict[str, Any]) -> str:
         crowd = ctx.get("crowd")
-        if not crowd or crowd["busiest"]["pct"] < 60:
+        if not crowd or crowd["busiest"]["pct"] < CROWD_HINT_THRESHOLD_PCT:
             return ""
         return p["crowd_hint"].format(
             busiest=crowd["busiest"]["name"],

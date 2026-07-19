@@ -54,7 +54,7 @@ def zones_by_id(venue: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return {z["id"]: z for z in venue["zones"]}
 
 
-def find_zone_positions(venue: dict[str, Any], text: str) -> list[tuple]:
+def find_zone_positions(venue: dict[str, Any], text: str) -> list[tuple[str, int]]:
     """Zones mentioned in ``text`` as ``(zone_id, char_index)`` pairs, ordered
     by first appearance. Matching is alias-based and case-insensitive."""
     lowered = text.lower()

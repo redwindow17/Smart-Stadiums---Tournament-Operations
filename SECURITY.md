@@ -45,9 +45,18 @@ flooding**, and **secret exposure**. Each is addressed below.
 
 ### Transport / response headers
 - A security-headers middleware sets `X-Content-Type-Options`,
-  `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, and a
-  strict same-origin `Content-Security-Policy` (no external scripts, styles,
-  fonts or connections) on every response.
+  `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`,
+  `Strict-Transport-Security` (HSTS, effective on any HTTPS deployment), and
+  a strict same-origin `Content-Security-Policy` (no external scripts,
+  styles, fonts or connections) on every response.
+- Every `/api/*` response is sent with `Cache-Control: no-store` because API
+  bodies can embed user-supplied text.
+
+### Error handling
+- A global exception handler logs full details server-side and returns a
+  generic `{"detail": "Internal server error"}` to clients, so stack traces,
+  paths and configuration can never leak through an unexpected failure
+  (verified by `tests/test_security.py::test_unhandled_errors_return_generic_500`).
 
 ### Secrets
 - No secrets are stored in code. The optional `ANTHROPIC_API_KEY` and all
@@ -60,6 +69,9 @@ flooding**, and **secret exposure**. Each is addressed below.
 - The runtime dependency surface is deliberately small (FastAPI, Pydantic,
   and — optionally — the Anthropic SDK). The frontend has **zero** third-party
   dependencies.
+- All dependencies are **pinned to exact versions** for reproducible,
+  auditable installs, and CI runs `pip-audit` against those pins on every
+  push to catch known vulnerabilities.
 
 ## Reporting a vulnerability
 

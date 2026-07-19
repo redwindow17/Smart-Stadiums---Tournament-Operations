@@ -103,7 +103,7 @@ def detect_language(text: str, requested: str = "auto") -> str:
     lowered = text.lower()
     words = set(re.findall(r"[\w'áéíóúüñàâçèéêîôûœ-]+", lowered))
 
-    def score(markers: list, chars: set) -> int:
+    def score(markers: list[str], chars: set[str]) -> int:
         hits = 0
         for marker in markers:
             if " " in marker or "'" in marker:

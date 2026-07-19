@@ -1,23 +1,15 @@
 /* StadiumIQ fan assistant - dependency-free, CSP-safe (no inline code).
    All API responses are rendered with textContent, never innerHTML with
-   user/AI text, so the UI is XSS-safe by construction. */
+   user/AI text, so the UI is XSS-safe by construction.
+   Shared helpers ($, fetchJSON) come from common.js. */
 "use strict";
 
-const $ = (id) => document.getElementById(id);
+/** @type {{venueId: string|null, history: Array<{role: string, content: string}>}} */
 const state = { venueId: null, history: [] };
-
-async function fetchJSON(url, options) {
-  const res = await fetch(url, options);
-  if (!res.ok) {
-    let detail = res.statusText;
-    try { detail = (await res.json()).detail || detail; } catch (_) { /* keep statusText */ }
-    throw new Error(detail);
-  }
-  return res.json();
-}
 
 /* ------------------------------ setup ---------------------------------- */
 
+/** Populate the venue selector and load the first venue. */
 async function loadVenues() {
   const data = await fetchJSON("/api/venues");
   const select = $("venue-select");
@@ -31,6 +23,10 @@ async function loadVenues() {
   await loadVenueDetail(select.value);
 }
 
+/**
+ * Load one venue's zones into the "I am at" selector and reset the chat.
+ * @param {string} venueId
+ */
 async function loadVenueDetail(venueId) {
   const venue = await fetchJSON(`/api/venues/${encodeURIComponent(venueId)}`);
   state.venueId = venue.id;
@@ -52,17 +48,31 @@ async function loadVenueDetail(venueId) {
 
 /* ---------------------------- rendering -------------------------------- */
 
+/**
+ * Append a chat bubble. Text is set via textContent (XSS-safe); errors get
+ * role="alert" so screen readers announce them immediately.
+ * @param {"user"|"assistant"|"error"} role
+ * @param {string} text
+ * @param {string} [lang] - BCP-47 tag when the reply is not English
+ * @returns {HTMLElement} the bubble element (cards are appended to it)
+ */
 function addMessage(role, text, lang) {
   const log = $("chat-log");
   const bubble = document.createElement("div");
   bubble.className = `msg msg-${role}`;
   bubble.textContent = text;
   if (lang && lang !== "en") bubble.setAttribute("lang", lang);
+  if (role === "error") bubble.setAttribute("role", "alert");
   log.append(bubble);
   log.scrollTop = log.scrollHeight;
   return bubble;
 }
 
+/**
+ * Create a titled card container for structured reply data.
+ * @param {string} title
+ * @returns {HTMLElement}
+ */
 function card(title) {
   const wrap = document.createElement("div");
   wrap.className = "msg-card";
@@ -72,6 +82,12 @@ function card(title) {
   return wrap;
 }
 
+/**
+ * Render the structured grounding (route / facilities / crowd / transport /
+ * match) returned alongside the reply as cards inside the bubble.
+ * @param {HTMLElement} bubble
+ * @param {Record<string, any>} data
+ */
 function appendDataCards(bubble, data) {
   if (data.route && data.route.steps && data.route.steps.length > 1) {
     const c = card(`Route - ${data.route.total_minutes} min${data.route.accessible ? " (step-free)" : ""}`);
@@ -128,14 +144,20 @@ function appendDataCards(bubble, data) {
 
 /* ------------------------------- chat ----------------------------------- */
 
+/**
+ * Send one message to the assistant and render the reply.
+ * @param {string} message
+ */
 async function sendMessage(message) {
   const trimmed = message.trim();
   if (!trimmed || !state.venueId) return;
 
   addMessage("user", trimmed);
+  const log = $("chat-log");
   const sendBtn = $("send-btn");
   const note = $("engine-note");
   sendBtn.disabled = true;
+  log.setAttribute("aria-busy", "true");
   note.textContent = "StadiumIQ is thinking...";
 
   const payload = {
@@ -164,6 +186,7 @@ async function sendMessage(message) {
     note.textContent = "";
   } finally {
     sendBtn.disabled = false;
+    log.setAttribute("aria-busy", "false");
     $("chat-input").focus();
   }
 }

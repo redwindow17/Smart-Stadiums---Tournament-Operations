@@ -60,6 +60,9 @@ SECURITY_HEADERS = {
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "no-referrer",
     "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+    # Browsers ignore HSTS over plain-HTTP localhost; in any HTTPS deployment
+    # (e.g. Vercel) this pins the origin to TLS for two years.
+    "Strict-Transport-Security": "max-age=63072000; includeSubDomains",
     # The frontend is fully self-contained: no external scripts, styles or fonts.
     "Content-Security-Policy": (
         "default-src 'self'; script-src 'self'; style-src 'self'; "

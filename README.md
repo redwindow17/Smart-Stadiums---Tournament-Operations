@@ -137,16 +137,18 @@ Set `ANTHROPIC_API_KEY` (and optionally `STADIUMIQ_MODEL`, `STADIUMIQ_RATE_LIMIT
 pytest
 ```
 
-**72 tests** cover routing (including a step-free connectivity guarantee for every venue), crowd-simulation determinism and thresholds, incident-triage scoring and priority boundaries, match-phase edges, route origin/destination orientation, cache identity, rate-limiter eviction, NLU (intents, three languages, word-boundary and punctuation edge cases), the full API surface, sanitisation, security headers and prompt-injection behaviour. The suite is deterministic and needs no network or key.
+**107 tests, 99% line coverage of `app/`** — covering routing (including a step-free connectivity guarantee for every venue), crowd-simulation determinism and thresholds, the ops rules engine on handcrafted worst-case snapshots, incident-triage scoring and priority boundaries, match-phase edges, route origin/destination orientation, cache identity and boundedness, rate-limiter eviction, NLU (intents, three languages, word-boundary and punctuation edge cases), the Claude engine against a stubbed SDK (prompt caching, history threading, refusal/error/empty-completion handling), the engine-fallback contract, the generic 500 handler, the full API surface, sanitisation, security headers and prompt-injection behaviour. The suite is deterministic and needs no network or key.
 
-Lint the code the same way CI does:
+Run the same quality gates CI runs:
 
 ```bash
 pip install -r requirements-dev.txt
-ruff check app tests run.py api
+ruff check app tests run.py api        # lint - passes clean
+mypy                                    # static type check - passes clean
+pytest --cov=app --cov-fail-under=95    # tests + coverage gate
 ```
 
-Every push and PR runs `ruff` + the full `pytest` suite on Python 3.10 / 3.11 / 3.12 via GitHub Actions (`.github/workflows/ci.yml`).
+Every push and PR runs `ruff`, `mypy`, the full `pytest` suite with the coverage gate, and a `pip-audit` dependency-vulnerability scan on Python 3.10 / 3.11 / 3.12 via GitHub Actions (`.github/workflows/ci.yml`).
 
 ## API overview
 
@@ -161,11 +163,11 @@ Every push and PR runs `ruff` + the full `pytest` suite on Python 3.10 / 3.11 / 
 
 ## How the evaluation focus areas are addressed
 
-- **Code quality** — layered structure (`api` → `services` → `ai` → `data`), an app factory for isolated test instances, fully type-hinted with modern (3.10+) built-in generics, docstrings that explain *why*, no dead code; **lint-clean under `ruff`** (config in `pyproject.toml`) and enforced in CI on every push.
-- **Security** — Pydantic validation with length/pattern constraints on every inbound field; control-character sanitisation before any text reaches a prompt or log; per-IP sliding-window rate limiting (429); security headers incl. a strict same-origin CSP; prompt-injection hardening (user text is delimited data, system prompt frozen; verified by tests); secrets only via environment variables; frontend renders exclusively with `textContent` (no `innerHTML` of untrusted text). The full threat model and control list is in [SECURITY.md](SECURITY.md).
-- **Efficiency** — knowledge base loaded once; crowd snapshots cached per 10-minute bucket; grounding pre-computed server-side so Claude needs a single small completion (no tool-loop round trips); the frozen system prompt is marked for Anthropic prompt caching; zero frontend dependencies (whole UI < 40 KB).
-- **Testing** — 72 deterministic tests (fixed timestamps, hash-based simulation, offline engine); unit + integration + boundary/adversarial coverage listed above; run in CI across Python 3.10–3.12.
-- **Accessibility** — step-free routing is a modelled feature, not an afterthought (tested: every zone in every venue is reachable step-free); UI: semantic landmarks, skip link, labelled controls, `aria-live` chat log and status regions, `lang` attributes on non-English replies, visible focus indicators, WCAG-AA-oriented contrast in light *and* dark themes, `prefers-reduced-motion` respected, fully keyboard-operable.
+- **Code quality** — layered structure (`api` → `services` → `ai` → `data`) with shared dependencies extracted (`app/api/deps.py`, `static/js/common.js` — no duplicated logic); an app factory for isolated test instances; **fully type-annotated and `mypy`-clean** (`disallow_untyped_defs` on all application code); **lint-clean under `ruff`**; named constants instead of magic numbers; docstrings that explain *why*; JSDoc-annotated frontend; all of it enforced in CI on every push.
+- **Security** — Pydantic validation with length/pattern constraints on every inbound field; control-character sanitisation before any text reaches a prompt or log; per-IP sliding-window rate limiting (429); security headers incl. a strict same-origin CSP, HSTS and `Cache-Control: no-store` on API responses; a global exception handler so internals never leak through a 500; prompt-injection hardening (user text is delimited data, system prompt frozen; verified by tests); secrets only via environment variables; pinned dependencies audited by `pip-audit` in CI; frontend renders exclusively with `textContent` (no `innerHTML` of untrusted text). The full threat model and control list is in [SECURITY.md](SECURITY.md).
+- **Efficiency** — knowledge base loaded once; crowd snapshots cached per 10-minute bucket (bounded cache, tested); grounding pre-computed server-side so Claude needs a single small completion (no tool-loop round trips); the frozen system prompt is marked for Anthropic prompt caching; zero frontend dependencies (whole UI < 40 KB).
+- **Testing** — 107 deterministic tests, 99% line coverage with a 95% CI gate (fixed timestamps, hash-based simulation, stubbed SDK — no network); unit + integration + boundary/adversarial coverage listed above; run in CI across Python 3.10–3.12.
+- **Accessibility** — step-free routing is a modelled feature, not an afterthought (tested: every zone in every venue is reachable step-free); UI: semantic landmarks, skip link, labelled controls, `aria-live` chat log with `aria-busy` while the assistant is thinking, errors announced via `role="alert"`, `lang` attributes on non-English replies, visible focus indicators, WCAG-AA-oriented contrast in light *and* dark themes (`color-scheme` declared), `prefers-reduced-motion` respected, fully keyboard-operable.
 
 ## Assumptions
 

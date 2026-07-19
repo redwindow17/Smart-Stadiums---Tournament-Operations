@@ -1,5 +1,11 @@
-"""Security behaviour: rate limiting, sanitisation, headers, injection."""
+"""Security behaviour: rate limiting, sanitisation, headers, injection,
+and the generic 500 handler."""
+from fastapi.testclient import TestClient
+
+from app.main import create_app
 from app.security import SlidingWindowRateLimiter, sanitize_text
+
+from .conftest import make_settings
 
 
 def test_rate_limit_returns_429(strict_client):
@@ -36,6 +42,26 @@ def test_security_headers_present(client):
     assert res.headers["X-Content-Type-Options"] == "nosniff"
     assert res.headers["X-Frame-Options"] == "DENY"
     assert "default-src 'self'" in res.headers["Content-Security-Policy"]
+    assert res.headers["Strict-Transport-Security"].startswith("max-age=")
+
+
+def test_api_responses_are_never_cached(client):
+    # Chat and ops responses can embed user-supplied text.
+    assert client.get("/api/health").headers["Cache-Control"] == "no-store"
+
+
+def test_unhandled_errors_return_generic_500():
+    app = create_app(make_settings())
+
+    def explode(**kwargs):
+        raise RuntimeError("super-secret internal detail")
+
+    app.state.assistant.answer = explode  # simulate an unexpected crash
+    client = TestClient(app, raise_server_exceptions=False)
+    res = client.post("/api/chat", json={"message": "hi", "venue_id": "azteca"})
+    assert res.status_code == 500
+    assert res.json() == {"detail": "Internal server error"}
+    assert "super-secret" not in res.text  # internals never leak to clients
 
 
 def test_prompt_injection_does_not_leak_internals(client):
